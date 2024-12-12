@@ -1,0 +1,42 @@
+SELECT
+    il1.install_loan_no,
+    il1.loan_sys_crt_dt,
+    il1.domain_id,
+    il1.loan_cust_sls,
+    il1.install_loan_no AS install_loan_no,
+    il1.loan_sys_crt_dt AS loan_sys_crt_dt,
+    il1.domain_id AS domain_id,
+    lci.term_billed_dt,
+    il1.cust_id_no,
+    lci.qty,
+    ils.instl_loan_stat_cd,
+    ilsr.instl_stat_rsn_cd
+FROM 
+    v210ans.installment_loan il1
+INNER JOIN 
+    v210ans.install_loan_status ils
+    ON il1.install_loan_no = ils.install_loan_no
+    AND il1.loan_sys_crt_dt = ils.loan_sys_crt_dt
+    AND il1.domain_id = ils.domain_id
+INNER JOIN 
+    v210ans.install_loan_curr_info lci
+    ON il1.install_loan_no = lci.install_loan_no
+    AND il1.loan_sys_crt_dt = lci.loan_sys_crt_dt
+    AND il1.domain_id = lci.domain_id
+LEFT JOIN 
+    vloans.install_loan_status ilsr
+    ON il1.install_loan_no = ilsr.install_loan_no
+    AND il1.loan_sys_crt_dt = ilsr.loan_sys_crt_dt
+    AND il1.domain_id = ilsr.domain_id
+    AND ilsr.loan_stat_end_ts = TO_TIMESTAMP('31-DEC-9999 12:00:00', 'DD-MM-YYYY HH24:MI:SS')
+LEFT JOIN 
+    vloans.install_loan_stat_rsn ilsr2
+    ON il1.install_loan_no = ilsr2.install_loan_no
+    AND il1.loan_sys_crt_dt = ilsr2.loan_sys_crt_dt
+    AND il1.domain_id = ilsr2.domain_id
+    AND ilsr2.loan_stat_end_ts = TO_TIMESTAMP('31-DEC-9999 12:00:00', 'DD-MM-YYYY HH24:MI:SS')
+WHERE 
+    il1.cust_id_no = '280500410'
+    AND ils.instl_loan_stat_cd IN ('A', 'AA', 'AR', 'B', 'E', 'F', 'U')
+    AND ils.loan_stat_end_ts = TO_TIMESTAMP('31-DEC-9999 12:00:00', 'DD-MM-YYYY HH24:MI:SS')
+    AND il1.loan_cust_sls_d < :bankruptcy_filing_ts;
